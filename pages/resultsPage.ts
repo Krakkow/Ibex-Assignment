@@ -7,7 +7,7 @@ export class ResultsPage {
 
   private async extractRatingFromHouse(listingIndex: number): Promise<number> {
     const house = this.availableHouses.nth(listingIndex);
-    const possibleRatingElements = house.locator('.//span[@aria-hidden="true" and matches(text(), "★")]');
+    const possibleRatingElements = house.locator('xpath=.//span[contains(text(), "out of 5")]');
     const possibleRatingElementsCount = await possibleRatingElements.count();
     for (let i = 0; i < possibleRatingElementsCount; i++) {
       const ratingElement = possibleRatingElements.nth(i).textContent();
@@ -22,30 +22,28 @@ export class ResultsPage {
     return 0;
   }
 
-  // async getHigestRatedHouses() {
-  //   // const availableHousesCount = await this.availableHouses.count();
-  //   if ((await this.availableHousesCount) === 0) {
-  //     throw new Error("No houses available for the selected dates and guests");
-  //   }
+  async getHighestRatedHouses() {
+    const listingCount = await this.availableHouses.count();
+    console.log(`Found ${listingCount} listings on the search results page.`);
+    if (listingCount === 0) {
+      throw new Error("No listings found on the search results page.");
+    }
+    let highestRatedHouse = null;
+    let highestRating = 0;
+    for (let i = 0; i < listingCount; i++) {
+      const house = this.page.getByTestId("card-container").nth(i);
+      const rating = await this.extractRatingFromHouse(i);
+      console.log(`Listing ${i} has rating: ${rating}`);
+      if (rating > highestRating) {
+        highestRating = rating;
+        highestRatedHouse = this.availableHouses.nth(i);
+      }
+    }
 
-  //   let highestRatedHouse = null;
-  //   let highestRating = 0;
-  //   for (let i = 0; i < await this.availableHousesCount; i++) {
-  //     const house = this.availableHouses.nth(i);
-  //     const rating = await this.extractRatingFromHouse(house);
-  //     if (rating > highestRating) {
-  //       highestRating = rating;
-  //       highestRatedHouse = house;
-  //     }
-  //   }
-  //   if (!highestRatedHouse) {
-  //     throw new Error("No houses available for the selected dates and guests");
-  //   }
-  //   return highestRatedHouse;
-  // }
+    if (!highestRatedHouse) {
+      throw new Error("No valid ratings found.");
+    }
 
-  // async selectHighestRatedHouse() {
-  //   const bestHouse = await this.getHigestRatedHouses();
-  //   await bestHouse.click();
-  // }
+    return highestRatedHouse;
+  }
 }

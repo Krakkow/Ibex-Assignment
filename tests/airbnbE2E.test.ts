@@ -12,12 +12,13 @@ test("Search AirBNB For Vacancy In A Destination", async ({ page }) => {
   await mainSearchPage.search();
 
   const availableHouses = page.getByTestId("card-container");
+  console.log(await availableHouses.count());
   await expect(availableHouses.first()).toBeVisible({ timeout: 5000 });
 
   const count = await availableHouses.count();
   expect(count).toBeGreaterThan(0);
   console.log(`Found ${count} available houses in Amsterdam for the selected dates and guests`);
 
-  const bestHouse = await resultsPage.getHigestRatedHouses();
+  const bestHouse = await resultsPage.getHighestRatedHouses();
   await bestHouse.click();
 });
