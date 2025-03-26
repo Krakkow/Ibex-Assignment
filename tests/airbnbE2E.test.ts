@@ -2,13 +2,15 @@ import { test, expect } from "@playwright/test";
 import { MainSearchPage } from "../pages/mainSearchPage";
 import { ResultsPage } from "../pages/resultsPage";
 import { HouseInformationPage } from "../pages/houseInformationPage";
+import { getDateButtonLabel } from "../utils/dateHelper";
+import { getStoredCheckInDate, getStoredCheckOutDate, selectDates } from "../utils/dateUtils";
 
 test("Search AirBNB For Vacancy In A Destination", async ({ page }) => {
   const mainSearchPage = new MainSearchPage(page);
   const resultsPage = new ResultsPage(page);
   await mainSearchPage.navigate();
   await mainSearchPage.searchDestination("Amsterdam");
-  await mainSearchPage.selectDates(1, 2);
+  await selectDates(page, 1, 2, mainSearchPage.getCheckInDatePickerButton());
   await mainSearchPage.setGuests(2, 1);
   await mainSearchPage.search();
 
@@ -26,11 +28,18 @@ test("Search AirBNB For Vacancy In A Destination", async ({ page }) => {
   await bestHousePage.waitForLoadState();
   await houseInformationPage.closePopup();
   await houseInformationPage.validateHouseLocation("Amsterdam");
-  const checkInDateToValidate = mainSearchPage.getCheckInDate();
-  await houseInformationPage.validateCheckInDate(checkInDateToValidate);
-  const checkoutDateToValidate = mainSearchPage.getCheckOutDate();
-  await houseInformationPage.validateCheckoutDate(checkoutDateToValidate);
+  await houseInformationPage.validateCheckInDate(getStoredCheckInDate(false), false);
+  await houseInformationPage.validateCheckoutDate(getStoredCheckOutDate(false), false);
+
   const guestsAmountToValidate = mainSearchPage.getGuestsAmount();
   await houseInformationPage.validateGuestAmount(guestsAmountToValidate);
+  await houseInformationPage.updateGuests(2, 0);
+  await houseInformationPage.validateGuestAmount(2);
+
+  const newCheckInDay = 7;
+  const newCheckOutDay = 8;
+  await houseInformationPage.updateBookingDates(newCheckInDay, newCheckOutDay);
+  await houseInformationPage.validateCheckInDate(getStoredCheckInDate(true), true);
+  await houseInformationPage.validateCheckoutDate(getStoredCheckOutDate(true), true);
   await bestHousePage.pause(); // I need to remove this before handing over the code to the team
 });

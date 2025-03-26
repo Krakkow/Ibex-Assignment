@@ -10,12 +10,14 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/date-fns": "^2.5.3",
     "@types/node": "^22.13.13",
     "playwright": "^1.51.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@playwright/test": "^1.51.1"
+    "@playwright/test": "^1.51.1",
+    "date-fns": "^4.1.0"
   }
 }

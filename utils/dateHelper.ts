@@ -1,21 +1,24 @@
-export function getDateButtonLabel(daysToSelect: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + daysToSelect);
-  const year = date.getFullYear();
-  const month = date.toLocaleDateString("en-US", { month: "long" });
-  const weekday = date.toLocaleDateString("en-US", { weekday: "long" });
-  const day = date.getDate();
+import { format } from "date-fns";
 
-  return `${day}, ${weekday}, ${month} ${year}.`;
+export function getDateButtonLabel(dayOffset: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + dayOffset);
+  const formattedDate = format(date, "d, EEEE, MMMM yyyy.");
+  console.log(`✅ getDateButtonLabel(${dayOffset}) = "${formattedDate}"`);
+  return formattedDate;
 }
 
-export function formatDateToExpectedFormat(rawDate: string): string {
+export function formatDateToExpectedFormat(rawDate: string, isHousePage: boolean): string {
   if (!rawDate) {
     throw new Error("Provided date is not valid.");
   }
   const [month, day, year] = rawDate.split("/");
   const parsedDate = new Date(`${year}-${month}-${day}`);
-  return `${parseInt(day)}, ${parsedDate.toLocaleString("en-US", { weekday: "long" })}, ${parsedDate.toLocaleString("en-US", {
-    month: "long",
-  })} ${year}.`;
+  if (isHousePage) {
+    return `0${parseInt(month)}/0${parseInt(day)}/${year}`;
+  } else {
+    return `${parseInt(day)}, ${parsedDate.toLocaleString("en-US", { weekday: "long" })}, ${parsedDate.toLocaleString("en-US", {
+      month: "long",
+    })} ${year}.`;
+  }
 }

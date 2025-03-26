@@ -1,6 +1,7 @@
 import { expect, Page } from "@playwright/test";
 import { waitForPageLoad } from "../utils/waitHelper";
 import { formatDateToExpectedFormat } from "../utils/dateHelper";
+import { selectDates } from "../utils/dateUtils";
 
 export class HouseInformationPage {
   constructor(private bestHouseTab: Page) {}
@@ -9,7 +10,13 @@ export class HouseInformationPage {
   private locationTitle = this.bestHouseTab.locator('//*[@id="site-content"]/div/div[1]/div[3]/div/div[1]/div/div[1]/div/div/div/section/div[1]/h2');
   private checkInDate = this.bestHouseTab.getByTestId("change-dates-checkIn");
   private checkoutDate = this.bestHouseTab.getByTestId("change-dates-checkOut");
-  private guestsAmount = this.bestHouseTab.locator('div[id="GuestPicker-book_it-trigger"] span');
+  private guestsAmount = this.bestHouseTab.locator('div[id="GuestPicker-book_it-trigger"]');
+  private adultsGuestsCurrentValue = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-adults-stepper-value");
+  private adultsDecreaseButton = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-adults-stepper-decrease-button");
+  private adultsIncreaseButton = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-adults-stepper-increase-button");
+  private kidsGuestsCurrentValue = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-children-stepper-value");
+  private kidsDecreaseButton = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-children-stepper-decrease-button");
+  private kidsIncreaseButton = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-children-stepper-increase-button");
 
   async checkIfPopupExists(): Promise<boolean> {
     await waitForPageLoad(this.bestHouseTab);
@@ -39,25 +46,25 @@ export class HouseInformationPage {
     console.log(`House location validated: ${locationText}`);
   }
 
-  async validateCheckInDate(expectedCheckInDate: string) {
+  async validateCheckInDate(expectedCheckInDate: string, isHousePage: boolean) {
     console.log("Validating check-in date");
     await this.checkInDate.waitFor({ state: "visible" });
     const actualCheckInDate = await this.checkInDate.textContent();
     if (!actualCheckInDate) {
       throw new Error("Check-in date not found");
     }
-    const formattedActualCheckInDate = formatDateToExpectedFormat(actualCheckInDate);
-    expect(formattedActualCheckInDate).toBe(expectedCheckInDate);
+    const formattedActualCheckInDate = formatDateToExpectedFormat(actualCheckInDate, isHousePage);
     console.log(`Check-in date validated: ${actualCheckInDate}`);
+    expect(formattedActualCheckInDate).toBe(expectedCheckInDate);
   }
 
-  async validateCheckoutDate(expectedCheckoutDate: string) {
+  async validateCheckoutDate(expectedCheckoutDate: string, isHousePage: boolean) {
     console.log("Validating checkout date");
     const actualCheckoutDate = await this.checkoutDate.textContent();
     if (!actualCheckoutDate) {
       throw new Error("Checkout date not found");
     }
-    const formattedActualCheckoutDate = formatDateToExpectedFormat(actualCheckoutDate);
+    const formattedActualCheckoutDate = formatDateToExpectedFormat(actualCheckoutDate, isHousePage);
     expect(formattedActualCheckoutDate).toBe(expectedCheckoutDate);
     console.log(`Checkout date validated: ${actualCheckoutDate}`);
   }
@@ -72,5 +79,36 @@ export class HouseInformationPage {
     const actualGuests = parseInt(actualGuestText.match(/\d+/)?.[0] || "0");
     expect(actualGuests).toBe(expectedGuests);
     console.log(`Guest count validated successfully.`);
+  }
+
+  async updateGuests(newAdultsCount: number, newKidscount: number) {
+    console.log("Updating guests count...");
+    await this.guestsAmount.click();
+    let actualAdultCount = parseInt((await this.adultsGuestsCurrentValue.textContent()) || "0");
+    let actualKidsCount = parseInt((await this.kidsGuestsCurrentValue.textContent()) || "0");
+    while (actualAdultCount < newAdultsCount) {
+      await this.adultsIncreaseButton.click();
+      actualAdultCount++;
+    }
+    while (actualAdultCount > newAdultsCount) {
+      await this.adultsDecreaseButton.click();
+      actualAdultCount--;
+    }
+    while (actualKidsCount < newKidscount) {
+      await this.kidsIncreaseButton.click();
+      actualKidsCount++;
+    }
+    while (actualKidsCount > newKidscount) {
+      await this.kidsDecreaseButton.click();
+      actualKidsCount--;
+    }
+    console.log(`Guest count updated to ${newAdultsCount} adults and ${newKidscount} kids.`);
+    await this.guestsAmount.click();
+  }
+
+  async updateBookingDates(newCheckInDay: number, newCheckOutDay: number) {
+    console.log("Updating booking dates...");
+    await selectDates(this.bestHouseTab, newCheckInDay, newCheckOutDay, this.checkInDate, true);
+    console.log("Booking dates updated.");
   }
 }

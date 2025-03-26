@@ -1,6 +1,7 @@
-import { Page, expect } from "@playwright/test";
+import { Locator, Page, expect } from "@playwright/test";
 import { getDateButtonLabel } from "../utils/dateHelper";
 import { waitForPageLoad } from "../utils/waitHelper";
+import { selectDates } from "../utils/dateUtils";
 
 export class MainSearchPage {
   private searchInputString = this.page.getByTestId("structured-search-input-field-query");
@@ -12,10 +13,6 @@ export class MainSearchPage {
   private selectedCheckOutDate: string = "";
   private selectedGuests: number = 0;
 
-  private getDateButton(date: string) {
-    return this.page.getByRole("button", { name: date });
-  }
-
   constructor(private page: Page) {}
 
   async navigate() {
@@ -23,32 +20,17 @@ export class MainSearchPage {
     await waitForPageLoad(this.page);
   }
 
+  async performSearch(destination: string, checkinDay: number, checkoutDay: number, adults: number, kids: number) {
+    await this.searchDestination(destination);
+    await selectDates(this.page, checkinDay, checkoutDay, this.checkInDatePickerButton);
+    await this.setGuests(adults, kids);
+    this.search;
+  }
+
   async searchDestination(destination: string) {
     await this.searchInputString.click();
     await this.searchInputString.fill(destination);
     await this.page.getByTestId("option-0").click();
-  }
-
-  async selectDates(checkinDay: number, checkoutDay: number) {
-    const checkinDate = getDateButtonLabel(checkinDay);
-    this.selectedCheckInDate = getDateButtonLabel(checkinDay);
-    console.log(checkinDate);
-    const checkoutDate = getDateButtonLabel(checkoutDay);
-    this.selectedCheckOutDate = getDateButtonLabel(checkoutDay);
-    console.log(checkoutDate);
-    const checkInDateButton = await this.getDateButton(checkinDate);
-    const isCalanderOpen = await checkInDateButton.isVisible().catch(() => false);
-    if (!isCalanderOpen) {
-      await this.checkInDatePickerButton.click();
-    }
-    const checkinDateSelectionButton = await this.page.getByRole("button", { name: checkinDate }).isVisible();
-    if (checkinDateSelectionButton) {
-      await this.getDateButton(checkinDate).click();
-    }
-    const checkoutDateSelectionButton = await this.page.getByRole("button", { name: checkoutDate }).isVisible();
-    if (checkoutDateSelectionButton) {
-      await this.getDateButton(checkoutDate).click();
-    }
   }
 
   async setGuests(adults: number, kids: number) {
@@ -85,5 +67,9 @@ export class MainSearchPage {
 
   getGuestsAmount(): number {
     return this.selectedGuests;
+  }
+
+  getCheckInDatePickerButton() {
+    return this.checkInDatePickerButton;
   }
 }
