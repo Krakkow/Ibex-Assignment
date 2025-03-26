@@ -17,6 +17,8 @@ export class HouseInformationPage {
   private kidsGuestsCurrentValue = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-children-stepper-value");
   private kidsDecreaseButton = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-children-stepper-decrease-button");
   private kidsIncreaseButton = this.bestHouseTab.getByTestId("GuestPicker-book_it-form-children-stepper-increase-button");
+  private reserveButton = this.bestHouseTab.getByRole("button", { name: "Reserve" });
+  private guestPicker = this.bestHouseTab.locator('[data-plugin-in-point-id="GUEST_PICKER"]');
 
   async checkIfPopupExists(): Promise<boolean> {
     await waitForPageLoad(this.bestHouseTab);
@@ -110,5 +112,27 @@ export class HouseInformationPage {
     console.log("Updating booking dates...");
     await selectDates(this.bestHouseTab, newCheckInDay, newCheckOutDay, this.checkInDate, true);
     console.log("Booking dates updated.");
+  }
+
+  async reserveHouse() {
+    console.log("Reserving house...");
+    await this.reserveButton.click();
+    console.log("House reserved.");
+  }
+
+  async validateReservationPageLoaded() {
+    console.log("Validating that we are on the reservation page...");
+    await waitForPageLoad(this.bestHouseTab);
+    const pageTitle = await this.bestHouseTab.title();
+    console.log(`Current page title: ${pageTitle}`);
+    expect(pageTitle).toContain("Confirm and pay");
+  }
+
+  async validateGuestCount(expectedGuestCount: number) {
+    console.log("Validating the guest count on the reservation page...");
+    await this.guestPicker.waitFor({ state: "visible" });
+    const actualGuestCount = await this.guestPicker.textContent();
+    console.log(`Guest count found: ${actualGuestCount}`);
+    expect(actualGuestCount?.trim()).toContain(`${expectedGuestCount}`);
   }
 }

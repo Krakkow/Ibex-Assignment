@@ -41,5 +41,7 @@ test("Search AirBNB For Vacancy In A Destination", async ({ page }) => {
   await houseInformationPage.updateBookingDates(newCheckInDay, newCheckOutDay);
   await houseInformationPage.validateCheckInDate(getStoredCheckInDate(true), true);
   await houseInformationPage.validateCheckoutDate(getStoredCheckOutDate(true), true);
-  await bestHousePage.pause(); // I need to remove this before handing over the code to the team
+  await houseInformationPage.reserveHouse();
+  await houseInformationPage.validateReservationPageLoaded();
+  await houseInformationPage.validateGuestCount(2);
 });

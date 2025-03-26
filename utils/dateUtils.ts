@@ -38,6 +38,7 @@ async function isCalendarOpen(dateButton: Locator): Promise<boolean> {
 }
 
 export async function selectDates(page: Page, checkinDay: number, checkoutDay: number, datePickerButton: Locator, isHousePage: boolean = false) {
+  await page.waitForTimeout(2000);
   generateFormattedDates(checkinDay, checkoutDay);
 
   console.log(`Attempting to select dates:`);
