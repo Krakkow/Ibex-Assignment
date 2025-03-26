@@ -14,6 +14,13 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
     screenshot: "only-on-failure",
     video: "retain-on-failure",
-    trace: "on-first-retry",
+    trace: "on",
+    launchOptions: {
+      args: ["--disable-blink-features=AutomationControlled"],
+      logger: {
+        isEnabled: (name, severity) => severity === "error",
+        log: () => {},
+      },
+    },
   },
 });

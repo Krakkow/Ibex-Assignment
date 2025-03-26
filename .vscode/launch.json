@@ -6,10 +6,9 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/@playwright/test/cli.js",
-      "args": ["test", "tests/airbnbE2E.test.ts"], // ✅ Removed --project=chromium
-      "console": "integratedTerminal",
+      "args": ["test", "tests/airbnbE2E.test.ts"],
       "env": {
-        "DEBUG": "pw:api"
+        "DEBUG": ""
       }
     }
   ]
