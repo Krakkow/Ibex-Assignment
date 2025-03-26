@@ -8,3 +8,14 @@ export function getDateButtonLabel(daysToSelect: number): string {
 
   return `${day}, ${weekday}, ${month} ${year}.`;
 }
+
+export function formatDateToExpectedFormat(rawDate: string): string {
+  if (!rawDate) {
+    throw new Error("Provided date is not valid.");
+  }
+  const [month, day, year] = rawDate.split("/");
+  const parsedDate = new Date(`${year}-${month}-${day}`);
+  return `${parseInt(day)}, ${parsedDate.toLocaleString("en-US", { weekday: "long" })}, ${parsedDate.toLocaleString("en-US", {
+    month: "long",
+  })} ${year}.`;
+}

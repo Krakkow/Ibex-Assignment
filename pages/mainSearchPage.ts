@@ -1,5 +1,6 @@
 import { Page, expect } from "@playwright/test";
 import { getDateButtonLabel } from "../utils/dateHelper";
+import { waitForPageLoad } from "../utils/waitHelper";
 
 export class MainSearchPage {
   private searchInputString = this.page.getByTestId("structured-search-input-field-query");
@@ -7,6 +8,9 @@ export class MainSearchPage {
   private addAdultButton = this.page.getByTestId("stepper-adults-increase-button");
   private addKidsButton = this.page.getByTestId("stepper-children-increase-button");
   private mainSearchButton = this.page.getByTestId("structured-search-input-search-button");
+  private selectedCheckInDate: string = "";
+  private selectedCheckOutDate: string = "";
+  private selectedGuests: number = 0;
 
   private getDateButton(date: string) {
     return this.page.getByRole("button", { name: date });
@@ -16,7 +20,7 @@ export class MainSearchPage {
 
   async navigate() {
     await this.page.goto("https://www.airbnb.com/");
-    await this.page.waitForLoadState("load");
+    await waitForPageLoad(this.page);
   }
 
   async searchDestination(destination: string) {
@@ -27,8 +31,10 @@ export class MainSearchPage {
 
   async selectDates(checkinDay: number, checkoutDay: number) {
     const checkinDate = getDateButtonLabel(checkinDay);
+    this.selectedCheckInDate = getDateButtonLabel(checkinDay);
     console.log(checkinDate);
     const checkoutDate = getDateButtonLabel(checkoutDay);
+    this.selectedCheckOutDate = getDateButtonLabel(checkoutDay);
     console.log(checkoutDate);
     const checkInDateButton = await this.getDateButton(checkinDate);
     const isCalanderOpen = await checkInDateButton.isVisible().catch(() => false);
@@ -61,9 +67,23 @@ export class MainSearchPage {
         await this.addKidsButton.click();
       }
     }
+    this.selectedGuests = adults + kids;
   }
 
   async search() {
     await this.mainSearchButton.click();
+    await waitForPageLoad(this.page);
+  }
+
+  getCheckInDate(): string {
+    return this.selectedCheckInDate;
+  }
+
+  getCheckOutDate(): string {
+    return this.selectedCheckOutDate;
+  }
+
+  getGuestsAmount(): number {
+    return this.selectedGuests;
   }
 }

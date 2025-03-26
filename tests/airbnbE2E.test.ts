@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { MainSearchPage } from "../pages/mainSearchPage";
 import { ResultsPage } from "../pages/resultsPage";
-import { ListingInformationPage } from "../pages/listingInformationPage";
+import { HouseInformationPage } from "../pages/houseInformationPage";
 
 test("Search AirBNB For Vacancy In A Destination", async ({ page }) => {
   const mainSearchPage = new MainSearchPage(page);
@@ -21,9 +21,16 @@ test("Search AirBNB For Vacancy In A Destination", async ({ page }) => {
   console.log(`Found ${count} available houses in Amsterdam for the selected dates and guests`);
 
   const bestHouse = await resultsPage.getHighestRatedHouses();
-  const [newTab] = await Promise.all([page.waitForEvent("popup"), await bestHouse.click()]);
-  const listingInformationPage = new ListingInformationPage(newTab);
-  await newTab.waitForLoadState();
-  await listingInformationPage.closePopup();
-  await newTab.pause(); // I need to remove this before handing over the code to the team
+  const [bestHousePage] = await Promise.all([page.waitForEvent("popup"), await bestHouse.click()]);
+  const houseInformationPage = new HouseInformationPage(bestHousePage);
+  await bestHousePage.waitForLoadState();
+  await houseInformationPage.closePopup();
+  await houseInformationPage.validateHouseLocation("Amsterdam");
+  const checkInDateToValidate = mainSearchPage.getCheckInDate();
+  await houseInformationPage.validateCheckInDate(checkInDateToValidate);
+  const checkoutDateToValidate = mainSearchPage.getCheckOutDate();
+  await houseInformationPage.validateCheckoutDate(checkoutDateToValidate);
+  const guestsAmountToValidate = mainSearchPage.getGuestsAmount();
+  await houseInformationPage.validateGuestAmount(guestsAmountToValidate);
+  await bestHousePage.pause(); // I need to remove this before handing over the code to the team
 });

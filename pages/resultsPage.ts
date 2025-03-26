@@ -1,4 +1,5 @@
 import { Page } from "@playwright/test";
+import { waitForPageLoad } from "../utils/waitHelper";
 
 export class ResultsPage {
   constructor(private page: Page) {}
@@ -6,6 +7,7 @@ export class ResultsPage {
   private availableHouses = this.page.getByTestId("card-container");
 
   private async getAvailableHousesCount(): Promise<number> {
+    await waitForPageLoad(this.page);
     return await this.availableHouses.count();
   }
 
